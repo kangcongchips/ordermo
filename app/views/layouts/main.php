@@ -19,8 +19,10 @@
                 <div class="dropdown">
                     <button class="dropdown-toggle">Account <span class="caret">▾</span></button>
                     <ul class="dropdown-menu">
-                        <li><a href="<?= BASE_URL ?>auth/login">Login</a></li>
-                        <li><a href="<?= BASE_URL ?>auth/register">Register</a></li>
+                        <li><a href="<?= BASE_URL ?>auth/login">Log in / Sign up</a></li>
+                        <li class="dropdown-divider"></li>
+                        <li><a href="<?= BASE_URL ?>merchant/apply">Apply as Merchant</a></li>
+                        <li><a href="<?= BASE_URL ?>rider/apply">Apply as Rider</a></li>
                     </ul>
                 </div>
                 <a href="<?= BASE_URL ?>cart" class="cart-icon" aria-label="Cart">
