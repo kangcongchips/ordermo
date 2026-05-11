@@ -87,6 +87,29 @@ body {
 
 .cart-icon { color: #2ecc40; display: flex; }
 
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #2ecc40;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s ease;
+}
+
+.user-avatar:hover { background: #27ae37; }
+
+.user-avatar-initial {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 /* ---------- Hero ---------- */
 .hero {
     position: relative;
@@ -702,6 +725,20 @@ body {
 }
 
 .auth-terms a:hover { text-decoration: underline; }
+
+.auth-errors {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.auth-error {
+    color: #b91c1c;
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 768px) {

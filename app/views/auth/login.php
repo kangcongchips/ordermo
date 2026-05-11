@@ -18,10 +18,18 @@
 
         <p class="auth-phone-label">Log in with your phone number</p>
 
+        <?php if (!empty($errors)): ?>
+            <div class="auth-errors">
+                <?php foreach ($errors as $error): ?>
+                    <p class="auth-error"><?= htmlspecialchars($error) ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
         <form action="<?= BASE_URL ?>auth/login" method="post" class="auth-phone-form login-form">
             <div class="phone-input">
                 <span class="phone-prefix">+63</span>
-                <input type="tel" name="phone" placeholder="PH mobile number" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="tel" name="phone" placeholder="PH mobile number" inputmode="numeric" pattern="[0-9]*" value="<?= htmlspecialchars($old['phone'] ?? '') ?>" required>
             </div>
             <input type="password" name="password" class="signup-input" placeholder="Password" required>
             <button type="submit" class="btn-primary">Log In</button>

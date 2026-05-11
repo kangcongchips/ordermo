@@ -16,15 +16,27 @@
                 <img src="<?= BASE_URL ?>images/logo.svg" alt="ordermo">
             </a>
             <nav class="nav-right">
-                <div class="dropdown">
-                    <button class="dropdown-toggle">Account <span class="caret">▾</span></button>
-                    <ul class="dropdown-menu">
-                        <li><a href="<?= BASE_URL ?>auth/login">Log in / Sign up</a></li>
-                        <li class="dropdown-divider"></li>
-                        <li><a href="<?= BASE_URL ?>merchant/apply">Apply as Merchant</a></li>
-                        <li><a href="<?= BASE_URL ?>rider/apply">Apply as Rider</a></li>
-                    </ul>
-                </div>
+                <?php if (!empty($_SESSION['user_id'])): ?>
+                    <?php $initial = strtoupper(substr($_SESSION['user_name'] ?? '?', 0, 1)); ?>
+                    <div class="dropdown">
+                        <button class="dropdown-toggle user-avatar" aria-label="Account menu">
+                            <span class="user-avatar-initial"><?= htmlspecialchars($initial) ?></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="<?= BASE_URL ?>auth/logout">Logout</a></li>
+                        </ul>
+                    </div>
+                <?php else: ?>
+                    <div class="dropdown">
+                        <button class="dropdown-toggle">Account <span class="caret">▾</span></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="<?= BASE_URL ?>auth/login">Log in / Sign up</a></li>
+                            <li class="dropdown-divider"></li>
+                            <li><a href="<?= BASE_URL ?>merchant/apply">Apply as Merchant</a></li>
+                            <li><a href="<?= BASE_URL ?>rider/apply">Apply as Rider</a></li>
+                        </ul>
+                    </div>
+                <?php endif; ?>
                 <a href="<?= BASE_URL ?>cart" class="cart-icon" aria-label="Cart">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
