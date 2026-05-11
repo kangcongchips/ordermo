@@ -1,6 +1,6 @@
 <?php
 
-define('BASE_URL', php_sapi_name() === 'cli-server' ? '/' : '/jonex/public/');
+define('BASE_URL', php_sapi_name() === 'cli-server' ? '/' : '/ordermo/public/');
 define('APP_NAME', 'ordermo');
 
 define('DB_HOST', 'localhost');
