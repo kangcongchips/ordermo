@@ -23,6 +23,19 @@ class City
         }
     }
 
+    /** Flat list of every city (id, name, province) for admin selects. */
+    public function all(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return $db->query(
+                'SELECT id, name, province FROM cities ORDER BY province, name'
+            )->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
     /** A single city by id, or null if missing / DB unavailable. */
     public function find(int $id): ?array
     {

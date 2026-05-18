@@ -98,4 +98,45 @@ class Order
             return null;
         }
     }
+
+    public const STATUSES = [
+        'pending', 'preparing', 'on_the_way', 'delivered', 'cancelled',
+    ];
+
+    /** All orders with merchant + customer name, newest first, for admin. */
+    public function allWithMeta(int $limit = 0): array
+    {
+        try {
+            $db  = Database::getConnection();
+            $sql =
+                'SELECT o.id, o.total, o.status, o.created_at,
+                        m.business_name,
+                        CONCAT(u.first_name, " ", u.last_name) AS customer_name
+                 FROM orders o
+                 JOIN merchants m ON m.id = o.merchant_id
+                 JOIN users u ON u.id = o.customer_user_id
+                 ORDER BY o.id DESC';
+            if ($limit > 0) {
+                $sql .= ' LIMIT ' . (int) $limit;
+            }
+            return $db->query($sql)->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    public function updateStatus(int $id, string $status): bool
+    {
+        if (!in_array($status, self::STATUSES, true)) {
+            return false;
+        }
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare('UPDATE orders SET status = ? WHERE id = ?');
+            $stmt->execute([$status, $id]);
+            return $stmt->rowCount() >= 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
 }
