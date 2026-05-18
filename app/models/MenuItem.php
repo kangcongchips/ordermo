@@ -65,6 +65,22 @@ class MenuItem
         }
     }
 
+    /** Distinct, non-empty category names already in use, sorted A→Z. */
+    public function distinctCategories(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return $db->query(
+                "SELECT DISTINCT category
+                 FROM menu_items
+                 WHERE category <> ''
+                 ORDER BY category"
+            )->fetchAll(PDO::FETCH_COLUMN);
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
     /**
      * Create a menu item.
      *

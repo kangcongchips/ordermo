@@ -136,26 +136,26 @@ class AdminController extends Controller
             $errors   = $this->validatePerson($old, $password);
 
             if ($old['business_name'] === '') {
-                $errors[] = 'Business name is required.';
+                $errors[] = 'Restaurant name is required.';
             }
             if ($old['business_address'] === '') {
-                $errors[] = 'Business address is required.';
+                $errors[] = 'Restaurant address is required.';
             }
             if (!in_array($old['application_status'], ['pending', 'approved', 'rejected'], true)) {
-                $errors[] = 'Choose a valid application status.';
+                $errors[] = 'Choose a valid listing status.';
             }
 
             if (!$errors) {
                 try {
                     $merchantModel->create($old + ['password' => $password]);
-                    $this->flashRedirect('admin/merchants', 'Merchant "' . $old['business_name'] . '" created.');
+                    $this->flashRedirect('admin/merchants', 'Restaurant "' . $old['business_name'] . '" created.');
                 } catch (Throwable $e) {
-                    $errors[] = 'Could not create merchant. Please try again.';
+                    $errors[] = 'Could not create restaurant. Please try again.';
                 }
             }
         }
 
-        $this->render('admin/merchants', 'merchants', 'Merchants', [
+        $this->render('admin/merchants', 'merchants', 'Restaurants', [
             'merchants' => $merchantModel->allWithUser(),
             'cities'    => $this->model('City')->all(),
             'errors'    => $errors,
@@ -187,7 +187,7 @@ class AdminController extends Controller
                 'description'  => trim($_POST['description'] ?? ''),
                 'price'        => trim($_POST['price'] ?? ''),
                 'category'     => trim($_POST['category'] ?? ''),
-                'image'        => trim($_POST['image'] ?? ''),
+                'image'        => '',
                 'is_available' => isset($_POST['is_available']) ? '1' : '0',
             ];
 
@@ -204,7 +204,13 @@ class AdminController extends Controller
                 $old['category'] = 'Others';
             }
 
+            [$uploadedImage, $imageError] = $this->handleImageUpload($_FILES['image'] ?? null);
+            if ($imageError !== null) {
+                $errors[] = $imageError;
+            }
+
             if (!$errors) {
+                $old['image'] = $uploadedImage ?? '';
                 try {
                     $menuModel->create($old);
                     $this->flashRedirect('admin/products', 'Product "' . $old['name'] . '" added.');
@@ -214,11 +220,21 @@ class AdminController extends Controller
             }
         }
 
+        $baseCategories = [
+            'Appetizers', 'Burgers', 'Chicken', 'Combo Meals', 'Desserts',
+            'Drinks', 'Filipino', 'Pasta', 'Rice Meals', 'Seafood',
+            'Sides', 'Snacks', 'Others',
+        ];
+        $categories = array_merge($baseCategories, $menuModel->distinctCategories());
+        $categories = array_values(array_unique($categories));
+        natcasesort($categories);
+
         $this->render('admin/products', 'products', 'Products', [
-            'products'  => $menuModel->allWithMerchant(),
-            'merchants' => $merchantModel->listForSelect(),
-            'errors'    => $errors,
-            'old'       => $old,
+            'products'   => $menuModel->allWithMerchant(),
+            'merchants'  => $merchantModel->listForSelect(),
+            'categories' => array_values($categories),
+            'errors'     => $errors,
+            'old'        => $old,
         ]);
     }
 
@@ -281,6 +297,57 @@ class AdminController extends Controller
     {
         $_SESSION['admin_flash'] = $message;
         $this->redirect($path);
+    }
+
+    /**
+     * Validate and store an uploaded product image under public/images/food/.
+     *
+     * @param  array|null $file A single entry from $_FILES.
+     * @return array{0:?string,1:?string} [savedFilename|null, errorMessage|null].
+     *         Both null means "no file was uploaded" (image is optional).
+     */
+    private function handleImageUpload(?array $file): array
+    {
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return [null, null];
+        }
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return [null, 'Image upload failed. Please try again.'];
+        }
+
+        if ($file['size'] > 5 * 1024 * 1024) {
+            return [null, 'Image is too large (max 5 MB).'];
+        }
+
+        $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/webp' => 'webp',
+            'image/gif'  => 'gif',
+        ];
+
+        $info = @getimagesize($file['tmp_name']);
+        $mime = $info['mime'] ?? '';
+        if (!isset($allowed[$mime])) {
+            return [null, 'Image must be a JPG, PNG, WEBP or GIF file.'];
+        }
+
+        // Dedicated, git-ignored folder for admin uploads. Stored as a path
+        // relative to images/food/ so existing rendering keeps working and
+        // seed images (e.g. "burger.jpg") are untouched.
+        $dir = __DIR__ . '/../../public/images/food/uploads/';
+        if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+            return [null, 'Could not save the image. Please try again.'];
+        }
+
+        $filename = 'p' . date('YmdHis') . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+
+        if (!move_uploaded_file($file['tmp_name'], $dir . $filename)) {
+            return [null, 'Could not save the image. Please try again.'];
+        }
+
+        return ['uploads/' . $filename, null];
     }
 
     /** @return array{first_name:string,last_name:string,email:string,phone:string} */

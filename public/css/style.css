@@ -1625,6 +1625,38 @@ a.btn-primary {
 .adm-card-title { margin: 0 0 1rem; font-size: 1.05rem; }
 .adm-empty { color: #6b7280; margin: 0; }
 
+.adm-form-note {
+    margin: -0.4rem 0 1.4rem;
+    padding: 0.7rem 0.9rem;
+    background: #fff7f5;
+    border: 1px solid #ffd9cf;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #6b7280;
+}
+.adm-form-note strong { color: #c23a1f; }
+
+.adm-form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #eef0f2;
+}
+.adm-form-section:last-of-type { border-bottom: 0; padding-bottom: 0; }
+
+.adm-form-section-title {
+    margin: 0 0 0.15rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+.adm-form-section-sub {
+    margin: 0 0 0.9rem;
+    font-size: 0.78rem;
+    color: #9ca3af;
+}
+.adm-form-section .adm-form-grid { margin-bottom: 0; }
+
 .adm-form-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1663,6 +1695,57 @@ a.btn-primary {
     align-self: end;
 }
 .adm-check input { width: auto; }
+
+.adm-upload {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border: 1.5px dashed #d1d5db;
+    border-radius: 9px;
+    background: #f9fafb;
+    transition: border-color 0.15s, background 0.15s;
+}
+.adm-upload:hover { border-color: #ff5a3c; background: #fff7f5; }
+
+.adm-upload-ico {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    color: #ff5a3c;
+}
+
+.adm-form .adm-upload input[type="file"] {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 0.8rem;
+    color: #6b7280;
+    cursor: pointer;
+}
+.adm-form .adm-upload input[type="file"]:focus { outline: none; }
+
+.adm-form .adm-upload input[type="file"]::file-selector-button {
+    font: inherit;
+    font-weight: 600;
+    margin-right: 0.7rem;
+    padding: 0.4rem 0.85rem;
+    border: 0;
+    border-radius: 7px;
+    background: #ff5a3c;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.adm-form .adm-upload input[type="file"]::file-selector-button:hover { background: #e84a2e; }
+
+.adm-hint {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: #9ca3af;
+}
 
 .adm-btn {
     background: #ff5a3c;

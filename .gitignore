@@ -14,3 +14,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Admin-uploaded product images (keep the folder, ignore its contents)
+/public/images/food/uploads/*
+!/public/images/food/uploads/.gitkeep

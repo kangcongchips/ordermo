@@ -5,7 +5,7 @@
     <?php else: ?>
         <table class="adm-table">
             <thead>
-                <tr><th>#</th><th>Customer</th><th>Merchant</th><th>Total</th><th>Placed</th><th>Status</th><th></th></tr>
+                <tr><th>#</th><th>Customer</th><th>Restaurant</th><th>Total</th><th>Placed</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
                 <?php foreach ($orders as $o): ?>

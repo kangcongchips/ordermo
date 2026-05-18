@@ -1,61 +1,78 @@
 <div class="adm-card">
-    <h2 class="adm-card-title">Add a merchant</h2>
+    <h2 class="adm-card-title">Add a restaurant</h2>
+    <p class="adm-form-note">
+        This creates an <strong>owner login</strong> (so they can sign in and manage the store)
+        <strong>and</strong> the <strong>restaurant</strong> customers see in the app — in one step.
+    </p>
     <form action="<?= BASE_URL ?>admin/merchants" method="post" class="adm-form">
-        <div class="adm-form-grid">
-            <label>Owner first name
-                <input type="text" name="first_name" value="<?= htmlspecialchars($old['first_name']) ?>" required>
-            </label>
-            <label>Owner last name
-                <input type="text" name="last_name" value="<?= htmlspecialchars($old['last_name']) ?>" required>
-            </label>
-            <label>Owner email
-                <input type="email" name="email" value="<?= htmlspecialchars($old['email']) ?>" required>
-            </label>
-            <label>Owner phone
-                <input type="tel" name="phone" value="<?= htmlspecialchars($old['phone']) ?>" placeholder="09171234567" required>
-            </label>
-            <label>Password
-                <input type="text" name="password" placeholder="min. 8 characters" required>
-            </label>
-            <label>Business name
-                <input type="text" name="business_name" value="<?= htmlspecialchars($old['business_name']) ?>" required>
-            </label>
-            <label class="adm-col-2">Business address
-                <input type="text" name="business_address" value="<?= htmlspecialchars($old['business_address']) ?>" required>
-            </label>
-            <label>City
-                <select name="city_id">
-                    <option value="">— None —</option>
-                    <?php foreach ($cities as $c): ?>
-                        <option value="<?= (int) $c['id'] ?>" <?= (string) $old['city_id'] === (string) $c['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($c['name'] . ', ' . $c['province']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>Cuisine
-                <input type="text" name="cuisine" value="<?= htmlspecialchars($old['cuisine']) ?>" placeholder="e.g. Filipino, Pasta">
-            </label>
-            <label>Application status
-                <select name="application_status">
-                    <?php foreach (['approved', 'pending', 'rejected'] as $s): ?>
-                        <option value="<?= $s ?>" <?= $old['application_status'] === $s ? 'selected' : '' ?>><?= ucfirst($s) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
+
+        <div class="adm-form-section">
+            <h3 class="adm-form-section-title">Owner account</h3>
+            <p class="adm-form-section-sub">The person who logs in to manage this restaurant.</p>
+            <div class="adm-form-grid">
+                <label>First name
+                    <input type="text" name="first_name" value="<?= htmlspecialchars($old['first_name']) ?>" required>
+                </label>
+                <label>Last name
+                    <input type="text" name="last_name" value="<?= htmlspecialchars($old['last_name']) ?>" required>
+                </label>
+                <label>Email
+                    <input type="email" name="email" value="<?= htmlspecialchars($old['email']) ?>" required>
+                </label>
+                <label>Phone
+                    <input type="tel" name="phone" value="<?= htmlspecialchars($old['phone']) ?>" placeholder="09171234567" required>
+                </label>
+                <label>Password
+                    <input type="text" name="password" placeholder="min. 8 characters" required>
+                </label>
+            </div>
         </div>
-        <button type="submit" class="adm-btn">Create merchant</button>
+
+        <div class="adm-form-section">
+            <h3 class="adm-form-section-title">Restaurant details</h3>
+            <p class="adm-form-section-sub">What customers see when browsing the app.</p>
+            <div class="adm-form-grid">
+                <label>Restaurant name
+                    <input type="text" name="business_name" value="<?= htmlspecialchars($old['business_name']) ?>" required>
+                </label>
+                <label class="adm-col-2">Address
+                    <input type="text" name="business_address" value="<?= htmlspecialchars($old['business_address']) ?>" required>
+                </label>
+                <label>City
+                    <select name="city_id">
+                        <option value="">— None —</option>
+                        <?php foreach ($cities as $c): ?>
+                            <option value="<?= (int) $c['id'] ?>" <?= (string) $old['city_id'] === (string) $c['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($c['name'] . ', ' . $c['province']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>Cuisine
+                    <input type="text" name="cuisine" value="<?= htmlspecialchars($old['cuisine']) ?>" placeholder="e.g. Filipino, Pasta">
+                </label>
+                <label>Listing status
+                    <select name="application_status">
+                        <?php foreach (['approved', 'pending', 'rejected'] as $s): ?>
+                            <option value="<?= $s ?>" <?= $old['application_status'] === $s ? 'selected' : '' ?>><?= ucfirst($s) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="adm-btn">Create restaurant</button>
     </form>
 </div>
 
 <div class="adm-card">
-    <h2 class="adm-card-title">All merchants (<?= count($merchants) ?>)</h2>
+    <h2 class="adm-card-title">All restaurants (<?= count($merchants) ?>)</h2>
     <?php if (!$merchants): ?>
-        <p class="adm-empty">No merchants yet.</p>
+        <p class="adm-empty">No restaurants yet.</p>
     <?php else: ?>
         <table class="adm-table">
             <thead>
-                <tr><th>#</th><th>Business</th><th>Owner</th><th>City</th><th>Cuisine</th><th>Status</th><th>Open</th></tr>
+                <tr><th>#</th><th>Restaurant</th><th>Owner</th><th>City</th><th>Cuisine</th><th>Status</th><th>Open</th></tr>
             </thead>
             <tbody>
                 <?php foreach ($merchants as $m): ?>

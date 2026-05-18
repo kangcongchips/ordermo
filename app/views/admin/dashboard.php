@@ -5,7 +5,7 @@
     </div>
     <div class="adm-stat">
         <span class="adm-stat-num"><?= (int) $stats['merchants'] ?></span>
-        <span class="adm-stat-label">Merchants</span>
+        <span class="adm-stat-label">Restaurants</span>
     </div>
     <div class="adm-stat">
         <span class="adm-stat-num"><?= (int) $stats['riders'] ?></span>
@@ -24,7 +24,7 @@
     <?php else: ?>
         <table class="adm-table">
             <thead>
-                <tr><th>#</th><th>Customer</th><th>Merchant</th><th>Total</th><th>Status</th><th>Placed</th></tr>
+                <tr><th>#</th><th>Customer</th><th>Restaurant</th><th>Total</th><th>Status</th><th>Placed</th></tr>
             </thead>
             <tbody>
                 <?php foreach ($recent as $o): ?>
