@@ -1,0 +1,16 @@
+# Local config with credentials — copy from config.example.php
+/app/config/config.php
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs
+*.log

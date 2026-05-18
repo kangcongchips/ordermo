@@ -9,7 +9,7 @@ class City
             $stmt = $db->query(
                 'SELECT id, name, image, province FROM cities
                  WHERE featured = 1
-                 ORDER BY FIELD(province, "Zambales", "Bataan", "Bulacan", "Pampanga"), name'
+                 ORDER BY FIELD(province, "Cebu"), name'
             );
             $rows = $stmt->fetchAll();
 
@@ -23,38 +23,41 @@ class City
         }
     }
 
+    /** A single city by id, or null if missing / DB unavailable. */
+    public function find(int $id): ?array
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT id, name, image, province FROM cities WHERE id = :id LIMIT 1'
+            );
+            $stmt->execute([':id' => $id]);
+            $row = $stmt->fetch();
+            return $row ?: null;
+        } catch (Throwable $e) {
+            foreach ($this->fallback() as $province => $cities) {
+                foreach ($cities as $c) {
+                    if ((int) $c['id'] === $id) {
+                        return $c + ['province' => $province];
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
     private function fallback(): array
     {
         return [
-            'Zambales' => [
-                ['id' => 1,  'name' => 'Castillejos',        'image' => 'castillejos.jpg'],
-                ['id' => 2,  'name' => 'Iba',                'image' => 'iba.jpg'],
-                ['id' => 3,  'name' => 'Olongapo City',      'image' => 'olongapo.jpg'],
-                ['id' => 4,  'name' => 'San Marcelino',      'image' => 'san-marcelino.jpg'],
-                ['id' => 5,  'name' => 'Subic',              'image' => 'subic.jpg'],
-                ['id' => 6,  'name' => 'Subic Bay Freeport', 'image' => 'subic-bay.jpg'],
-            ],
-            'Bataan' => [
-                ['id' => 7,  'name' => 'Abucay',         'image' => 'abucay.jpg'],
-                ['id' => 8,  'name' => 'Bagac',          'image' => 'bagac.jpg'],
-                ['id' => 9,  'name' => 'Balanga City',   'image' => 'balanga.jpg'],
-                ['id' => 10, 'name' => 'Dinalupihan',    'image' => 'dinalupihan.jpg'],
-                ['id' => 11, 'name' => 'Hermosa',        'image' => 'hermosa.jpg'],
-                ['id' => 12, 'name' => 'Limay',          'image' => 'limay.jpg'],
-            ],
-            'Bulacan' => [
-                ['id' => 13, 'name' => 'Balagtas',         'image' => 'balagtas.jpg'],
-                ['id' => 14, 'name' => 'Baliwag City',     'image' => 'baliwag.jpg'],
-                ['id' => 15, 'name' => 'Angat',            'image' => 'angat.jpg'],
-                ['id' => 16, 'name' => 'Bustos',           'image' => 'bustos.jpg'],
-                ['id' => 17, 'name' => 'Malolos City',     'image' => 'malolos.jpg'],
-                ['id' => 18, 'name' => 'Meycauayan City',  'image' => 'meycauayan.jpg'],
-            ],
-            'Pampanga' => [
-                ['id' => 19, 'name' => 'Candaba',      'image' => 'candaba.jpg'],
-                ['id' => 20, 'name' => 'Floridablanca','image' => 'floridablanca.jpg'],
-                ['id' => 21, 'name' => 'Guagua',       'image' => 'guagua.jpg'],
-                ['id' => 22, 'name' => 'Lubao',        'image' => 'lubao.jpg'],
+            'Cebu' => [
+                ['id' => 1, 'name' => 'Cebu City',      'image' => 'cebu-city.jpg'],
+                ['id' => 2, 'name' => 'Mandaue City',   'image' => 'mandaue.jpg'],
+                ['id' => 3, 'name' => 'Lapu-Lapu City', 'image' => 'lapu-lapu.jpg'],
+                ['id' => 4, 'name' => 'Talisay City',   'image' => 'talisay.jpg'],
+                ['id' => 5, 'name' => 'Toledo City',    'image' => 'toledo.jpg'],
+                ['id' => 6, 'name' => 'Carcar City',    'image' => 'carcar.jpg'],
+                ['id' => 7, 'name' => 'Danao City',     'image' => 'danao.jpg'],
+                ['id' => 8, 'name' => 'Naga City',      'image' => 'naga.jpg'],
             ],
         ];
     }
