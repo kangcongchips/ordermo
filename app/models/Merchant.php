@@ -63,6 +63,100 @@ class Merchant
         }
     }
 
+    /**
+     * Owner login lookup: the merchant profile + the user account behind it,
+     * matched by email. Any application status (a pending owner can still see
+     * their own dashboard). Null if no such merchant.
+     */
+    public function findForLogin(string $email): ?array
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT m.id AS merchant_id, m.business_name,
+                        m.application_status, m.is_open,
+                        u.id AS user_id, u.first_name, u.last_name,
+                        u.password_hash, u.status
+                 FROM users u
+                 JOIN merchants m ON m.user_id = u.id
+                 WHERE u.email = :e AND u.role = "merchant"
+                 LIMIT 1'
+            );
+            $stmt->execute([':e' => $email]);
+            $row = $stmt->fetch();
+            return $row ?: null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
+    /** The signed-in owner's full restaurant profile (any status), or null. */
+    public function profileByUserId(int $userId): ?array
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT m.*, c.name AS city_name,
+                        u.first_name, u.last_name, u.email, u.phone
+                 FROM merchants m
+                 JOIN users u ON u.id = m.user_id
+                 LEFT JOIN cities c ON c.id = m.city_id
+                 WHERE m.user_id = :u
+                 LIMIT 1'
+            );
+            $stmt->execute([':u' => $userId]);
+            $row = $stmt->fetch();
+            return $row ?: null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Headline numbers for the owner dashboard.
+     *
+     * @return array{orders:int,pending:int,menu_items:int,revenue:float}
+     */
+    public function statsForMerchant(int $merchantId): array
+    {
+        try {
+            $db = Database::getConnection();
+
+            $count = function (string $sql) use ($db, $merchantId): int {
+                $stmt = $db->prepare($sql);
+                $stmt->execute([':m' => $merchantId]);
+                return (int) $stmt->fetchColumn();
+            };
+
+            $rev = $db->prepare(
+                'SELECT COALESCE(SUM(total), 0) FROM orders
+                 WHERE merchant_id = :m AND status = "delivered"'
+            );
+            $rev->execute([':m' => $merchantId]);
+
+            return [
+                'orders'     => $count('SELECT COUNT(*) FROM orders WHERE merchant_id = :m'),
+                'pending'    => $count('SELECT COUNT(*) FROM orders WHERE merchant_id = :m AND status = "pending"'),
+                'menu_items' => $count('SELECT COUNT(*) FROM menu_items WHERE merchant_id = :m'),
+                'revenue'    => (float) $rev->fetchColumn(),
+            ];
+        } catch (Throwable $e) {
+            return ['orders' => 0, 'pending' => 0, 'menu_items' => 0, 'revenue' => 0.0];
+        }
+    }
+
+    /** Open or close the restaurant for new orders. */
+    public function setOpen(int $merchantId, bool $open): bool
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare('UPDATE merchants SET is_open = ? WHERE id = ?');
+            return $stmt->execute([$open ? 1 : 0, $merchantId]);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     /** Minimal id/name list (any status) for select dropdowns. */
     public function listForSelect(): array
     {

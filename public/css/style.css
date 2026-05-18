@@ -1815,3 +1815,70 @@ a.btn-primary {
     .adm-form-grid { grid-template-columns: 1fr; }
     .adm-col-2 { grid-column: auto; }
 }
+
+/* ---------------------------------------------------------------------------
+   Partner portal (restaurant owner + rider) — reuses the .adm-* shell with a
+   top bar instead of a sidebar.
+   --------------------------------------------------------------------------- */
+.portal-topbar { gap: 1.25rem; }
+.portal-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.portal-brand img { height: 20px; width: auto; display: block; }
+.portal-spacer { flex: 1; }
+.portal-logout {
+    flex-shrink: 0;
+    border: 1px solid #e6e8eb;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4b5563;
+    text-decoration: none;
+}
+.portal-logout:hover { background: #f4f5f7; color: #1a1f2e; }
+
+.portal-banner {
+    background: #fef4e5;
+    color: #a05a00;
+    border: 1px solid #f3d9ad;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+.portal-banner strong { text-transform: capitalize; }
+
+.portal-profile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 2rem;
+}
+.portal-profile-label {
+    display: block;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+    margin-bottom: 0.2rem;
+}
+.portal-profile-value {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1f2e;
+}
+.portal-inline { display: inline; }
+
+@media (max-width: 720px) {
+    .portal-topbar { flex-wrap: wrap; height: auto; padding: 0.75rem 1rem; }
+    .portal-spacer { display: none; }
+    .portal-profile { grid-template-columns: 1fr; }
+}

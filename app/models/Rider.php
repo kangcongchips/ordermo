@@ -22,6 +22,64 @@ class Rider
     }
 
     /**
+     * Rider login lookup: the rider profile + the user account behind it,
+     * matched by email. Any application status. Null if no such rider.
+     */
+    public function findForLogin(string $email): ?array
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT r.id AS rider_id, r.vehicle_type, r.license_number,
+                        r.application_status, r.is_available,
+                        u.id AS user_id, u.first_name, u.last_name,
+                        u.password_hash, u.status
+                 FROM users u
+                 JOIN riders r ON r.user_id = u.id
+                 WHERE u.email = :e AND u.role = "rider"
+                 LIMIT 1'
+            );
+            $stmt->execute([':e' => $email]);
+            $row = $stmt->fetch();
+            return $row ?: null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
+    /** The signed-in rider's full profile (any status), or null. */
+    public function profileByUserId(int $userId): ?array
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT r.*, u.first_name, u.last_name, u.email, u.phone
+                 FROM riders r
+                 JOIN users u ON u.id = r.user_id
+                 WHERE r.user_id = :u
+                 LIMIT 1'
+            );
+            $stmt->execute([':u' => $userId]);
+            $row = $stmt->fetch();
+            return $row ?: null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
+    /** Toggle whether the rider is accepting deliveries. */
+    public function setAvailability(int $riderId, bool $available): bool
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare('UPDATE riders SET is_available = ? WHERE id = ?');
+            return $stmt->execute([$available ? 1 : 0, $riderId]);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
      * Create the user account + rider profile in one transaction.
      *
      * @param array $d first_name,last_name,email,phone,password,

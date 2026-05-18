@@ -3,8 +3,16 @@
         <span class="auth-badge auth-badge-rider">Rider</span>
         <h1 class="auth-title">Welcome Back</h1>
 
+        <?php if (!empty($errors)): ?>
+            <div class="auth-errors">
+                <?php foreach ($errors as $error): ?>
+                    <p class="auth-error"><?= htmlspecialchars($error) ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
         <form action="<?= BASE_URL ?>rider/login" method="post" class="login-form">
-            <input type="email" name="email" class="signup-input" placeholder="Email" required>
+            <input type="email" name="email" class="signup-input" placeholder="Email" value="<?= htmlspecialchars($old['email'] ?? '') ?>" required autofocus>
             <input type="password" name="password" class="signup-input" placeholder="Password" required>
             <button type="submit" class="btn-primary">Log In</button>
         </form>

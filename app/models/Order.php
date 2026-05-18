@@ -125,6 +125,69 @@ class Order
         }
     }
 
+    /** One restaurant's own orders, newest first, with customer name. */
+    public function forMerchant(int $merchantId, int $limit = 0): array
+    {
+        try {
+            $db  = Database::getConnection();
+            $sql =
+                'SELECT o.id, o.subtotal, o.delivery_fee, o.total, o.status,
+                        o.delivery_address, o.contact_phone, o.notes, o.created_at,
+                        CONCAT(u.first_name, " ", u.last_name) AS customer_name
+                 FROM orders o
+                 JOIN users u ON u.id = o.customer_user_id
+                 WHERE o.merchant_id = :m
+                 ORDER BY o.id DESC';
+            if ($limit > 0) {
+                $sql .= ' LIMIT ' . (int) $limit;
+            }
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':m' => $merchantId]);
+            return $stmt->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /** True if the order belongs to this restaurant (ownership guard). */
+    public function merchantOwns(int $orderId, int $merchantId): bool
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT 1 FROM orders WHERE id = ? AND merchant_id = ? LIMIT 1'
+            );
+            $stmt->execute([$orderId, $merchantId]);
+            return (bool) $stmt->fetchColumn();
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * The delivery board for riders: orders a kitchen has started or sent out,
+     * oldest first (FIFO), with restaurant + drop-off details.
+     */
+    public function forDelivery(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return $db->query(
+                'SELECT o.id, o.total, o.status, o.delivery_address,
+                        o.contact_phone, o.created_at,
+                        m.business_name, m.business_address,
+                        CONCAT(u.first_name, " ", u.last_name) AS customer_name
+                 FROM orders o
+                 JOIN merchants m ON m.id = o.merchant_id
+                 JOIN users u ON u.id = o.customer_user_id
+                 WHERE o.status IN ("preparing", "on_the_way")
+                 ORDER BY o.created_at ASC'
+            )->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
     public function updateStatus(int $id, string $status): bool
     {
         if (!in_array($status, self::STATUSES, true)) {
