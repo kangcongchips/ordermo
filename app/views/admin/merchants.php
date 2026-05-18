@@ -4,7 +4,7 @@
         This creates an <strong>owner login</strong> (so they can sign in and manage the store)
         <strong>and</strong> the <strong>restaurant</strong> customers see in the app — in one step.
     </p>
-    <form action="<?= BASE_URL ?>admin/merchants" method="post" class="adm-form">
+    <form action="<?= BASE_URL ?>admin/merchants" method="post" class="adm-form" enctype="multipart/form-data">
 
         <div class="adm-form-section">
             <h3 class="adm-form-section-title">Owner account</h3>
@@ -50,6 +50,17 @@
                 </label>
                 <label>Cuisine
                     <input type="text" name="cuisine" value="<?= htmlspecialchars($old['cuisine']) ?>" placeholder="e.g. Filipino, Pasta">
+                </label>
+                <label>Photo
+                    <span class="adm-upload">
+                        <svg class="adm-upload-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <input type="file" name="cover_image" accept="image/jpeg,image/png,image/webp,image/gif">
+                    </span>
+                    <small class="adm-hint">JPG, PNG, WEBP or GIF — max 5&nbsp;MB. Optional.</small>
                 </label>
                 <label>Listing status
                     <select name="application_status">

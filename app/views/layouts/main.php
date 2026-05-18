@@ -32,8 +32,8 @@
                         <ul class="dropdown-menu">
                             <li><a href="<?= BASE_URL ?>auth/login">Log in / Sign up</a></li>
                             <li class="dropdown-divider"></li>
-                            <li><a href="<?= BASE_URL ?>merchant/apply">Apply as Merchant</a></li>
-                            <li><a href="<?= BASE_URL ?>rider/apply">Apply as Rider</a></li>
+                            <li><a href="<?= BASE_URL ?>merchant/login">Merchant Login</a></li>
+                            <li><a href="<?= BASE_URL ?>rider/login">Rider Login</a></li>
                         </ul>
                     </div>
                 <?php endif; ?>

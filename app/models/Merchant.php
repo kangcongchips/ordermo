@@ -175,7 +175,7 @@ class Merchant
      *
      * @param array $d first_name,last_name,email,phone,password,
      *                  business_name,business_address,city_id,cuisine,
-     *                  application_status
+     *                  cover_image,application_status
      */
     public function create(array $d): int
     {
@@ -196,8 +196,8 @@ class Merchant
             $stmt = $db->prepare(
                 'INSERT INTO merchants
                     (user_id, business_name, business_address, city_id, cuisine,
-                     application_status, is_open)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)'
+                     cover_image, application_status, is_open)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $stmt->execute([
                 $userId,
@@ -205,6 +205,7 @@ class Merchant
                 $d['business_address'],
                 $d['city_id'] !== '' ? (int) $d['city_id'] : null,
                 $d['cuisine'],
+                ($d['cover_image'] ?? '') !== '' ? $d['cover_image'] : null,
                 $d['application_status'],
                 $d['application_status'] === 'approved' ? 1 : 0,
             ]);

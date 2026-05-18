@@ -121,6 +121,7 @@ class AdminController extends Controller
             'business_address'   => '',
             'city_id'            => '',
             'cuisine'            => '',
+            'cover_image'        => '',
             'application_status' => 'approved',
         ];
 
@@ -130,6 +131,7 @@ class AdminController extends Controller
                 'business_address'   => trim($_POST['business_address'] ?? ''),
                 'city_id'            => trim($_POST['city_id'] ?? ''),
                 'cuisine'            => trim($_POST['cuisine'] ?? ''),
+                'cover_image'        => '',
                 'application_status' => $_POST['application_status'] ?? 'approved',
             ];
             $password = (string) ($_POST['password'] ?? '');
@@ -145,7 +147,13 @@ class AdminController extends Controller
                 $errors[] = 'Choose a valid listing status.';
             }
 
+            [$uploadedImage, $imageError] = $this->handleImageUpload($_FILES['cover_image'] ?? null);
+            if ($imageError !== null) {
+                $errors[] = $imageError;
+            }
+
             if (!$errors) {
+                $old['cover_image'] = $uploadedImage ?? '';
                 try {
                     $merchantModel->create($old + ['password' => $password]);
                     $this->flashRedirect('admin/merchants', 'Restaurant "' . $old['business_name'] . '" created.');
