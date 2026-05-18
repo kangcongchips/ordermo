@@ -2,6 +2,8 @@ CREATE DATABASE IF NOT EXISTS ordermo CHARACTER SET utf8mb4 COLLATE utf8mb4_unic
 USE ordermo;
 
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS menu_items;
 DROP TABLE IF EXISTS merchants;
 DROP TABLE IF EXISTS riders;
@@ -228,3 +230,44 @@ INSERT INTO menu_items (merchant_id, name, description, price, image, category) 
     (12, 'Lasagna Bella',       'Layered beef lasagna with cheese',               239.00, 'pasta.jpg',   'Pasta'),
     (12, 'Aglio e Olio',        'Garlic and olive oil spaghetti',                 169.00, 'pasta.jpg',   'Pasta'),
     (12, 'Garlic Bread',        'Toasted bread with garlic butter',                89.00, 'fries.jpg',   'Snacks');
+
+-- ----------------------------------------------------------------------------
+-- Orders: one order per restaurant. Line items snapshot name/price so a later
+-- menu change never rewrites order history.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_user_id INT NOT NULL,
+    merchant_id INT NOT NULL,
+    delivery_address VARCHAR(255) NOT NULL,
+    contact_phone VARCHAR(20) NOT NULL,
+    payment_method ENUM('cod') NOT NULL DEFAULT 'cod',
+    subtotal DECIMAL(10,2) NOT NULL,
+    delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    total DECIMAL(10,2) NOT NULL,
+    status ENUM('pending', 'preparing', 'on_the_way', 'delivered', 'cancelled')
+        NOT NULL DEFAULT 'pending',
+    notes VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
+    INDEX idx_customer (customer_user_id),
+    INDEX idx_merchant (merchant_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB;
+
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    menu_item_id INT DEFAULT NULL,
+    name VARCHAR(150) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE SET NULL,
+    INDEX idx_order (order_id)
+) ENGINE=InnoDB;

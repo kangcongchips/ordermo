@@ -61,7 +61,11 @@ $cover    = $r['cover_image']
                                 <p class="menu-item-desc"><?= htmlspecialchars($item['description']) ?></p>
                                 <div class="menu-item-foot">
                                     <span class="menu-item-price">₱<?= number_format((float) $item['price'], 2) ?></span>
-                                    <button type="button" class="menu-add" aria-label="Add to cart">Add +</button>
+                                    <form action="<?= BASE_URL ?>cart/add" method="post" class="menu-add-form">
+                                        <input type="hidden" name="menu_item_id" value="<?= (int) $item['id'] ?>">
+                                        <input type="hidden" name="redirect" value="restaurant/<?= (int) $r['id'] ?>">
+                                        <button type="submit" class="menu-add" aria-label="Add to cart">Add +</button>
+                                    </form>
                                 </div>
                             </div>
                             <?php if (!empty($item['image'])): ?>

@@ -30,8 +30,7 @@ class AuthController extends Controller
                     $_SESSION['user_name'] = $user['first_name'];
                     $_SESSION['flash']     = 'Welcome back, ' . $user['first_name'] . '!';
 
-                    header('Location: ' . BASE_URL);
-                    exit;
+                    $this->finishAuth();
                 }
             }
         }
@@ -117,8 +116,7 @@ class AuthController extends Controller
                     $_SESSION['user_name']  = $old['first_name'];
                     $_SESSION['flash']      = 'Welcome to ordermo, ' . $old['first_name'] . '!';
 
-                    header('Location: ' . BASE_URL);
-                    exit;
+                    $this->finishAuth();
                 } catch (Throwable $e) {
                     $errors[] = 'Sign up failed. Please try again.';
                 }
@@ -130,5 +128,34 @@ class AuthController extends Controller
             'errors' => $errors,
             'old'    => $old,
         ]);
+    }
+
+    /**
+     * Finish a successful login/registration: if the user was trying to add a
+     * menu item before logging in, add it now, then return them to where they
+     * were instead of the home page.
+     */
+    private function finishAuth(): void
+    {
+        $destination = BASE_URL;
+
+        if (!empty($_SESSION['pending_cart_add'])) {
+            $itemId = (int) $_SESSION['pending_cart_add'];
+            $item   = $this->model('MenuItem')->find($itemId);
+
+            if ($item) {
+                $_SESSION['cart'][$itemId] = ($_SESSION['cart'][$itemId] ?? 0) + 1;
+                $_SESSION['flash'] = $item['name'] . ' added to your cart.';
+            }
+        }
+
+        if (!empty($_SESSION['intended_url'])) {
+            $destination = BASE_URL . ltrim($_SESSION['intended_url'], '/');
+        }
+
+        unset($_SESSION['pending_cart_add'], $_SESSION['intended_url']);
+
+        header('Location: ' . $destination);
+        exit;
     }
 }

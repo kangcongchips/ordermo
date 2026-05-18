@@ -17,6 +17,15 @@ class User
         return $digits;
     }
 
+    public function findById(int $id): ?array
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     public function findByEmail(string $email): ?array
     {
         $db   = Database::getConnection();
