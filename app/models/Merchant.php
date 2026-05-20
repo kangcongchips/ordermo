@@ -145,6 +145,83 @@ class Merchant
         }
     }
 
+    /**
+     * Set the application status (pending/approved/rejected). Keeps the owner
+     * user account's login status in sync so a rejected/pending owner can't
+     * sign in until they're approved.
+     */
+    public function updateApplicationStatus(int $merchantId, string $status): bool
+    {
+        if (!in_array($status, ['pending', 'approved', 'rejected'], true)) {
+            return false;
+        }
+        $db = Database::getConnection();
+        $db->beginTransaction();
+        try {
+            $stmt = $db->prepare(
+                'UPDATE merchants SET application_status = ?, is_open = ? WHERE id = ?'
+            );
+            $stmt->execute([$status, $status === 'approved' ? 1 : 0, $merchantId]);
+
+            $stmt = $db->prepare(
+                'UPDATE users u
+                 JOIN merchants m ON m.user_id = u.id
+                 SET u.status = ?
+                 WHERE m.id = ?'
+            );
+            $stmt->execute([self::userStatusFor($status), $merchantId]);
+
+            $db->commit();
+            return true;
+        } catch (Throwable $e) {
+            $db->rollBack();
+            return false;
+        }
+    }
+
+    /** Map application_status → users.status for the owner account. */
+    private static function userStatusFor(string $applicationStatus): string
+    {
+        return match ($applicationStatus) {
+            'approved' => 'active',
+            'rejected' => 'suspended',
+            default    => 'pending',
+        };
+    }
+
+    /** Pending merchant registrations for the admin dashboard. */
+    public function pendingApplications(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return $db->query(
+                'SELECT m.id, m.business_name, m.business_address, m.cuisine,
+                        m.application_status, c.name AS city_name,
+                        u.first_name, u.last_name, u.email, u.phone, m.created_at
+                 FROM merchants m
+                 JOIN users u ON u.id = m.user_id
+                 LEFT JOIN cities c ON c.id = m.city_id
+                 WHERE m.application_status = "pending"
+                 ORDER BY m.created_at ASC'
+            )->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /** Count of pending merchant applications. */
+    public function pendingCount(): int
+    {
+        try {
+            $db = Database::getConnection();
+            return (int) $db->query(
+                'SELECT COUNT(*) FROM merchants WHERE application_status = "pending"'
+            )->fetchColumn();
+        } catch (Throwable $e) {
+            return 0;
+        }
+    }
+
     /** Open or close the restaurant for new orders. */
     public function setOpen(int $merchantId, bool $open): bool
     {
@@ -183,13 +260,15 @@ class Merchant
         $db->beginTransaction();
 
         try {
+            $userStatus = self::userStatusFor($d['application_status']);
             $stmt = $db->prepare(
                 'INSERT INTO users (first_name, last_name, email, phone, password_hash, role, status)
-                 VALUES (?, ?, ?, ?, ?, "merchant", "active")'
+                 VALUES (?, ?, ?, ?, ?, "merchant", ?)'
             );
             $stmt->execute([
                 $d['first_name'], $d['last_name'], $d['email'], $d['phone'],
                 password_hash($d['password'], PASSWORD_BCRYPT),
+                $userStatus,
             ]);
             $userId = (int) $db->lastInsertId();
 

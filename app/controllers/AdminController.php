@@ -61,8 +61,10 @@ class AdminController extends Controller
         $this->requireAdmin();
 
         $this->render('admin/dashboard', 'dashboard', 'Dashboard', [
-            'stats'  => $this->model('Admin')->dashboardStats(),
-            'recent' => $this->model('Order')->allWithMeta(8),
+            'stats'           => $this->model('Admin')->dashboardStats(),
+            'recent'          => $this->model('Order')->allWithMeta(8),
+            'pendingRiders'   => $this->model('Rider')->pendingApplications(),
+            'pendingMerchants'=> $this->model('Merchant')->pendingApplications(),
         ]);
     }
 
@@ -71,42 +73,21 @@ class AdminController extends Controller
         $this->requireAdmin();
         $riderModel = $this->model('Rider');
 
-        $errors = [];
-        $old    = $this->blankPerson() + ['vehicle_type' => 'motorcycle', 'license_number' => '', 'application_status' => 'approved'];
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $old      = $this->personInput() + [
-                'vehicle_type'       => $_POST['vehicle_type'] ?? 'motorcycle',
-                'license_number'     => trim($_POST['license_number'] ?? ''),
-                'application_status' => $_POST['application_status'] ?? 'approved',
-            ];
-            $password = (string) ($_POST['password'] ?? '');
-            $errors   = $this->validatePerson($old, $password);
+            $riderId = (int) ($_POST['rider_id'] ?? 0);
+            $status  = (string) ($_POST['application_status'] ?? '');
 
-            if (!in_array($old['vehicle_type'], ['motorcycle', 'bicycle', 'car'], true)) {
-                $errors[] = 'Choose a valid vehicle type.';
+            if ($riderId > 0 && $riderModel->updateApplicationStatus($riderId, $status)) {
+                $label = $status === 'approved' ? 'approved'
+                    : ($status === 'rejected' ? 'rejected' : 'set to pending');
+                $this->flashRedirect('admin/riders', 'Rider #' . $riderId . ' ' . $label . '.');
             }
-            if ($old['license_number'] === '') {
-                $errors[] = 'License number is required.';
-            }
-            if (!in_array($old['application_status'], ['pending', 'approved', 'rejected'], true)) {
-                $errors[] = 'Choose a valid application status.';
-            }
-
-            if (!$errors) {
-                try {
-                    $riderModel->create($old + ['password' => $password]);
-                    $this->flashRedirect('admin/riders', 'Rider "' . $old['first_name'] . ' ' . $old['last_name'] . '" created.');
-                } catch (Throwable $e) {
-                    $errors[] = 'Could not create rider. Please try again.';
-                }
-            }
+            $this->flashRedirect('admin/riders', 'Could not update that rider.');
         }
 
         $this->render('admin/riders', 'riders', 'Riders', [
-            'riders' => $riderModel->allWithUser(),
-            'errors' => $errors,
-            'old'    => $old,
+            'riders'  => $riderModel->allWithUser(),
+            'pending' => $riderModel->pendingApplications(),
         ]);
     }
 
@@ -115,59 +96,21 @@ class AdminController extends Controller
         $this->requireAdmin();
         $merchantModel = $this->model('Merchant');
 
-        $errors = [];
-        $old    = $this->blankPerson() + [
-            'business_name'      => '',
-            'business_address'   => '',
-            'city_id'            => '',
-            'cuisine'            => '',
-            'cover_image'        => '',
-            'application_status' => 'approved',
-        ];
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $old = $this->personInput() + [
-                'business_name'      => trim($_POST['business_name'] ?? ''),
-                'business_address'   => trim($_POST['business_address'] ?? ''),
-                'city_id'            => trim($_POST['city_id'] ?? ''),
-                'cuisine'            => trim($_POST['cuisine'] ?? ''),
-                'cover_image'        => '',
-                'application_status' => $_POST['application_status'] ?? 'approved',
-            ];
-            $password = (string) ($_POST['password'] ?? '');
-            $errors   = $this->validatePerson($old, $password);
+            $merchantId = (int) ($_POST['merchant_id'] ?? 0);
+            $status     = (string) ($_POST['application_status'] ?? '');
 
-            if ($old['business_name'] === '') {
-                $errors[] = 'Restaurant name is required.';
+            if ($merchantId > 0 && $merchantModel->updateApplicationStatus($merchantId, $status)) {
+                $label = $status === 'approved' ? 'approved'
+                    : ($status === 'rejected' ? 'rejected' : 'set to pending');
+                $this->flashRedirect('admin/merchants', 'Restaurant #' . $merchantId . ' ' . $label . '.');
             }
-            if ($old['business_address'] === '') {
-                $errors[] = 'Restaurant address is required.';
-            }
-            if (!in_array($old['application_status'], ['pending', 'approved', 'rejected'], true)) {
-                $errors[] = 'Choose a valid listing status.';
-            }
-
-            [$uploadedImage, $imageError] = $this->handleImageUpload($_FILES['cover_image'] ?? null);
-            if ($imageError !== null) {
-                $errors[] = $imageError;
-            }
-
-            if (!$errors) {
-                $old['cover_image'] = $uploadedImage ?? '';
-                try {
-                    $merchantModel->create($old + ['password' => $password]);
-                    $this->flashRedirect('admin/merchants', 'Restaurant "' . $old['business_name'] . '" created.');
-                } catch (Throwable $e) {
-                    $errors[] = 'Could not create restaurant. Please try again.';
-                }
-            }
+            $this->flashRedirect('admin/merchants', 'Could not update that restaurant.');
         }
 
         $this->render('admin/merchants', 'merchants', 'Restaurants', [
             'merchants' => $merchantModel->allWithUser(),
-            'cities'    => $this->model('City')->all(),
-            'errors'    => $errors,
-            'old'       => $old,
+            'pending'   => $merchantModel->pendingApplications(),
         ]);
     }
 
@@ -358,46 +301,4 @@ class AdminController extends Controller
         return ['uploads/' . $filename, null];
     }
 
-    /** @return array{first_name:string,last_name:string,email:string,phone:string} */
-    private function blankPerson(): array
-    {
-        return ['first_name' => '', 'last_name' => '', 'email' => '', 'phone' => ''];
-    }
-
-    private function personInput(): array
-    {
-        return [
-            'first_name' => trim($_POST['first_name'] ?? ''),
-            'last_name'  => trim($_POST['last_name'] ?? ''),
-            'email'      => trim($_POST['email'] ?? ''),
-            'phone'      => User::normalizePhone($_POST['phone'] ?? ''),
-        ];
-    }
-
-    /** Shared validation for the user account behind a rider/merchant. */
-    private function validatePerson(array &$d, string $password): array
-    {
-        $errors = [];
-
-        if ($d['first_name'] === '') {
-            $errors[] = 'First name is required.';
-        }
-        if ($d['last_name'] === '') {
-            $errors[] = 'Last name is required.';
-        }
-        if (!filter_var($d['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'A valid email is required.';
-        }
-        if (!preg_match('/^09\d{9}$/', $d['phone'])) {
-            $errors[] = 'Enter a valid PH mobile number (e.g. 09171234567).';
-        }
-        if (strlen($password) < 8) {
-            $errors[] = 'Password must be at least 8 characters.';
-        }
-        if (!$errors && $this->model('User')->findByEmail($d['email'])) {
-            $errors[] = 'That email is already registered.';
-        }
-
-        return $errors;
-    }
 }

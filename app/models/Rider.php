@@ -67,6 +67,79 @@ class Rider
         }
     }
 
+    /**
+     * Set the application status (pending/approved/rejected). Keeps the rider's
+     * user account login status in sync so a rejected/pending rider can't sign
+     * in until they're approved.
+     */
+    public function updateApplicationStatus(int $riderId, string $status): bool
+    {
+        if (!in_array($status, ['pending', 'approved', 'rejected'], true)) {
+            return false;
+        }
+        $db = Database::getConnection();
+        $db->beginTransaction();
+        try {
+            $stmt = $db->prepare('UPDATE riders SET application_status = ? WHERE id = ?');
+            $stmt->execute([$status, $riderId]);
+
+            $stmt = $db->prepare(
+                'UPDATE users u
+                 JOIN riders r ON r.user_id = u.id
+                 SET u.status = ?
+                 WHERE r.id = ?'
+            );
+            $stmt->execute([self::userStatusFor($status), $riderId]);
+
+            $db->commit();
+            return true;
+        } catch (Throwable $e) {
+            $db->rollBack();
+            return false;
+        }
+    }
+
+    /** Map application_status → users.status for the rider account. */
+    private static function userStatusFor(string $applicationStatus): string
+    {
+        return match ($applicationStatus) {
+            'approved' => 'active',
+            'rejected' => 'suspended',
+            default    => 'pending',
+        };
+    }
+
+    /** Pending rider registrations for the admin dashboard. */
+    public function pendingApplications(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return $db->query(
+                'SELECT r.id, r.vehicle_type, r.license_number, r.application_status,
+                        u.first_name, u.last_name, u.email, u.phone, r.created_at
+                 FROM riders r
+                 JOIN users u ON u.id = r.user_id
+                 WHERE r.application_status = "pending"
+                 ORDER BY r.created_at ASC'
+            )->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /** Count of pending rider applications. */
+    public function pendingCount(): int
+    {
+        try {
+            $db = Database::getConnection();
+            return (int) $db->query(
+                'SELECT COUNT(*) FROM riders WHERE application_status = "pending"'
+            )->fetchColumn();
+        } catch (Throwable $e) {
+            return 0;
+        }
+    }
+
     /** Toggle whether the rider is accepting deliveries. */
     public function setAvailability(int $riderId, bool $available): bool
     {
@@ -91,13 +164,15 @@ class Rider
         $db->beginTransaction();
 
         try {
+            $userStatus = self::userStatusFor($d['application_status']);
             $stmt = $db->prepare(
                 'INSERT INTO users (first_name, last_name, email, phone, password_hash, role, status)
-                 VALUES (?, ?, ?, ?, ?, "rider", "active")'
+                 VALUES (?, ?, ?, ?, ?, "rider", ?)'
             );
             $stmt->execute([
                 $d['first_name'], $d['last_name'], $d['email'], $d['phone'],
                 password_hash($d['password'], PASSWORD_BCRYPT),
+                $userStatus,
             ]);
             $userId = (int) $db->lastInsertId();
 

@@ -33,6 +33,10 @@ class RiderController extends Controller
 
                 if (!$rider || !password_verify($password, $rider['password_hash'])) {
                     $errors[] = 'Invalid email or password.';
+                } elseif ($rider['application_status'] === 'pending') {
+                    $errors[] = 'Your application is still pending admin approval.';
+                } elseif ($rider['application_status'] === 'rejected') {
+                    $errors[] = 'Your application was rejected. Please contact support.';
                 } elseif ($rider['status'] !== 'active') {
                     $errors[] = 'This account is not active. Please contact support.';
                 } else {
@@ -116,14 +120,95 @@ class RiderController extends Controller
             'portalLogout' => 'rider/logout',
             'profile'      => $profile,
             'approved'     => $approved,
+            'stats'        => $approved ? $orderModel->riderBoardStats() : ['waiting' => 0, 'in_transit' => 0, 'delivered_today' => 0],
             'deliveries'   => $approved ? $orderModel->forDelivery() : [],
         ], 'portal');
     }
 
     public function apply(): void
     {
+        $errors  = [];
+        $success = false;
+        $old     = [
+            'first_name'     => '',
+            'last_name'      => '',
+            'email'          => '',
+            'phone'          => '',
+            'vehicle_type'   => '',
+            'license_number' => '',
+        ];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'first_name'     => trim($_POST['first_name'] ?? ''),
+                'last_name'      => trim($_POST['last_name'] ?? ''),
+                'email'          => trim($_POST['email'] ?? ''),
+                'phone'          => trim($_POST['phone'] ?? ''),
+                'vehicle_type'   => trim($_POST['vehicle_type'] ?? ''),
+                'license_number' => trim($_POST['license_number'] ?? ''),
+            ];
+            $password        = (string) ($_POST['password'] ?? '');
+            $passwordConfirm = (string) ($_POST['password_confirm'] ?? '');
+
+            $normalizedPhone = User::normalizePhone($old['phone']);
+
+            if ($old['first_name'] === '') {
+                $errors[] = 'First name is required.';
+            }
+            if ($old['last_name'] === '') {
+                $errors[] = 'Last name is required.';
+            }
+            if (!filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'A valid email is required.';
+            }
+            if (!preg_match('/^09\d{9}$/', $normalizedPhone)) {
+                $errors[] = 'Enter a valid PH mobile number (e.g. 09171234567).';
+            }
+            if (!in_array($old['vehicle_type'], ['motorcycle', 'bicycle', 'car'], true)) {
+                $errors[] = 'Choose a valid vehicle type.';
+            }
+            if ($old['license_number'] === '') {
+                $errors[] = 'License number is required.';
+            }
+            if (strlen($password) < 8) {
+                $errors[] = 'Password must be at least 8 characters.';
+            }
+            if ($password !== $passwordConfirm) {
+                $errors[] = 'Passwords do not match.';
+            }
+
+            if (!$errors && $this->model('User')->findByEmail($old['email'])) {
+                $errors[] = 'That email is already registered.';
+            }
+
+            if (!$errors) {
+                try {
+                    $this->model('Rider')->create([
+                        'first_name'         => $old['first_name'],
+                        'last_name'          => $old['last_name'],
+                        'email'              => $old['email'],
+                        'phone'              => $normalizedPhone,
+                        'password'           => $password,
+                        'vehicle_type'       => $old['vehicle_type'],
+                        'license_number'     => $old['license_number'],
+                        'application_status' => 'pending',
+                    ]);
+                    $success = true;
+                    $old = [
+                        'first_name' => '', 'last_name' => '', 'email' => '',
+                        'phone' => '', 'vehicle_type' => '', 'license_number' => '',
+                    ];
+                } catch (Throwable $e) {
+                    $errors[] = 'Could not submit application. Please try again.';
+                }
+            }
+        }
+
         $this->view('rider/apply', [
-            'title' => 'Apply as Rider - ordermo',
+            'title'   => 'Apply as Rider - ordermo',
+            'errors'  => $errors,
+            'old'     => $old,
+            'success' => $success,
         ]);
     }
 

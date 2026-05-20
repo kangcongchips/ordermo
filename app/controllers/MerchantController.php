@@ -30,6 +30,10 @@ class MerchantController extends Controller
 
                 if (!$merchant || !password_verify($password, $merchant['password_hash'])) {
                     $errors[] = 'Invalid email or password.';
+                } elseif ($merchant['application_status'] === 'pending') {
+                    $errors[] = 'Your application is still pending admin approval.';
+                } elseif ($merchant['application_status'] === 'rejected') {
+                    $errors[] = 'Your application was rejected. Please contact support.';
                 } elseif ($merchant['status'] !== 'active') {
                     $errors[] = 'This account is not active. Please contact support.';
                 } else {
@@ -113,8 +117,91 @@ class MerchantController extends Controller
 
     public function apply(): void
     {
+        $errors  = [];
+        $success = false;
+        $old     = [
+            'first_name'       => '',
+            'last_name'        => '',
+            'business_name'    => '',
+            'business_address' => '',
+            'email'            => '',
+            'phone'            => '',
+        ];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'first_name'       => trim($_POST['first_name'] ?? ''),
+                'last_name'        => trim($_POST['last_name'] ?? ''),
+                'business_name'    => trim($_POST['business_name'] ?? ''),
+                'business_address' => trim($_POST['business_address'] ?? ''),
+                'email'            => trim($_POST['email'] ?? ''),
+                'phone'            => trim($_POST['phone'] ?? ''),
+            ];
+            $password        = (string) ($_POST['password'] ?? '');
+            $passwordConfirm = (string) ($_POST['password_confirm'] ?? '');
+
+            $normalizedPhone = User::normalizePhone($old['phone']);
+
+            if ($old['first_name'] === '') {
+                $errors[] = 'First name is required.';
+            }
+            if ($old['last_name'] === '') {
+                $errors[] = 'Last name is required.';
+            }
+            if ($old['business_name'] === '') {
+                $errors[] = 'Business name is required.';
+            }
+            if ($old['business_address'] === '') {
+                $errors[] = 'Business address is required.';
+            }
+            if (!filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'A valid email is required.';
+            }
+            if (!preg_match('/^09\d{9}$/', $normalizedPhone)) {
+                $errors[] = 'Enter a valid PH mobile number (e.g. 09171234567).';
+            }
+            if (strlen($password) < 8) {
+                $errors[] = 'Password must be at least 8 characters.';
+            }
+            if ($password !== $passwordConfirm) {
+                $errors[] = 'Passwords do not match.';
+            }
+
+            if (!$errors && $this->model('User')->findByEmail($old['email'])) {
+                $errors[] = 'That email is already registered.';
+            }
+
+            if (!$errors) {
+                try {
+                    $this->model('Merchant')->create([
+                        'first_name'         => $old['first_name'],
+                        'last_name'          => $old['last_name'],
+                        'email'              => $old['email'],
+                        'phone'              => $normalizedPhone,
+                        'password'           => $password,
+                        'business_name'      => $old['business_name'],
+                        'business_address'   => $old['business_address'],
+                        'city_id'            => '',
+                        'cuisine'            => '',
+                        'cover_image'        => '',
+                        'application_status' => 'pending',
+                    ]);
+                    $success = true;
+                    $old = [
+                        'first_name' => '', 'last_name' => '', 'business_name' => '',
+                        'business_address' => '', 'email' => '', 'phone' => '',
+                    ];
+                } catch (Throwable $e) {
+                    $errors[] = 'Could not submit application. Please try again.';
+                }
+            }
+        }
+
         $this->view('merchant/apply', [
-            'title' => 'Apply as Merchant - ordermo',
+            'title'   => 'Apply as Merchant - ordermo',
+            'errors'  => $errors,
+            'old'     => $old,
+            'success' => $success,
         ]);
     }
 

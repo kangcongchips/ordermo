@@ -165,6 +165,33 @@ class Order
     }
 
     /**
+     * Quick counters for the rider dashboard. Orders aren't assigned to a
+     * specific rider, so these reflect the shared board.
+     *
+     * @return array{waiting:int,in_transit:int,delivered_today:int}
+     */
+    public function riderBoardStats(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return [
+                'waiting'         => (int) $db->query(
+                    'SELECT COUNT(*) FROM orders WHERE status = "preparing"'
+                )->fetchColumn(),
+                'in_transit'      => (int) $db->query(
+                    'SELECT COUNT(*) FROM orders WHERE status = "on_the_way"'
+                )->fetchColumn(),
+                'delivered_today' => (int) $db->query(
+                    'SELECT COUNT(*) FROM orders
+                     WHERE status = "delivered" AND DATE(updated_at) = CURDATE()'
+                )->fetchColumn(),
+            ];
+        } catch (Throwable $e) {
+            return ['waiting' => 0, 'in_transit' => 0, 'delivered_today' => 0];
+        }
+    }
+
+    /**
      * The delivery board for riders: orders a kitchen has started or sent out,
      * oldest first (FIFO), with restaurant + drop-off details.
      */

@@ -9,27 +9,46 @@ $available = (int) $profile['is_available'] === 1;
     </div>
 <?php endif; ?>
 
+<div class="rider-hero <?= $available ? 'is-online' : 'is-offline' ?>">
+    <div class="rider-hero-main">
+        <span class="rider-hero-dot" aria-hidden="true"></span>
+        <div>
+            <h2 class="rider-hero-state"><?= $available ? "You're online" : "You're offline" ?></h2>
+            <p class="rider-hero-sub">
+                <?= $available
+                    ? 'Accepting deliveries. Pick one up from the board below.'
+                    : 'Toggle online to start accepting deliveries.' ?>
+            </p>
+        </div>
+    </div>
+    <?php if ($approved): ?>
+        <form action="<?= BASE_URL ?>rider/dashboard" method="post" class="rider-hero-action">
+            <input type="hidden" name="action" value="toggle_available">
+            <input type="hidden" name="available" value="<?= $available ? '0' : '1' ?>">
+            <button type="submit" class="adm-btn rider-hero-btn">
+                <?= $available ? 'Go offline' : 'Go online' ?>
+            </button>
+        </form>
+    <?php endif; ?>
+</div>
+
 <div class="adm-stats">
     <div class="adm-stat">
-        <span class="adm-stat-num"><?= htmlspecialchars(ucfirst($profile['vehicle_type'])) ?></span>
-        <span class="adm-stat-label">Vehicle</span>
+        <span class="adm-stat-num"><?= (int) $stats['waiting'] ?></span>
+        <span class="adm-stat-label">Waiting for pickup</span>
     </div>
     <div class="adm-stat">
-        <span class="adm-stat-num" style="font-size:1.1rem;"><?= htmlspecialchars($profile['license_number']) ?></span>
-        <span class="adm-stat-label">License</span>
+        <span class="adm-stat-num"><?= (int) $stats['in_transit'] ?></span>
+        <span class="adm-stat-label">In transit</span>
     </div>
     <div class="adm-stat">
-        <span class="adm-stat-num"><?= $available ? 'Online' : 'Offline' ?></span>
-        <span class="adm-stat-label">Availability</span>
-    </div>
-    <div class="adm-stat">
-        <span class="adm-stat-num"><?= count($deliveries) ?></span>
-        <span class="adm-stat-label">Open deliveries</span>
+        <span class="adm-stat-num"><?= (int) $stats['delivered_today'] ?></span>
+        <span class="adm-stat-label">Delivered today</span>
     </div>
 </div>
 
 <div class="adm-card">
-    <h2 class="adm-card-title">Your status</h2>
+    <h2 class="adm-card-title">Profile</h2>
     <div class="portal-profile">
         <div>
             <span class="portal-profile-label">Rider</span>
@@ -40,22 +59,17 @@ $available = (int) $profile['is_available'] === 1;
             <span class="portal-profile-value"><?= htmlspecialchars($profile['phone']) ?> · <?= htmlspecialchars($profile['email']) ?></span>
         </div>
         <div>
+            <span class="portal-profile-label">Vehicle</span>
+            <span class="portal-profile-value"><?= htmlspecialchars(ucfirst($profile['vehicle_type'])) ?></span>
+        </div>
+        <div>
+            <span class="portal-profile-label">License</span>
+            <span class="portal-profile-value"><?= htmlspecialchars($profile['license_number']) ?></span>
+        </div>
+        <div>
             <span class="portal-profile-label">Account</span>
             <span class="portal-profile-value">
                 <span class="adm-badge adm-badge-<?= htmlspecialchars($profile['application_status']) ?>"><?= htmlspecialchars(ucfirst($profile['application_status'])) ?></span>
-            </span>
-        </div>
-        <div>
-            <span class="portal-profile-label">Availability</span>
-            <span class="portal-profile-value">
-                <span class="adm-badge <?= $available ? 'adm-badge-active' : 'adm-badge-cancelled' ?>"><?= $available ? 'Online' : 'Offline' ?></span>
-                <?php if ($approved): ?>
-                    <form action="<?= BASE_URL ?>rider/dashboard" method="post" class="portal-inline">
-                        <input type="hidden" name="action" value="toggle_available">
-                        <input type="hidden" name="available" value="<?= $available ? '0' : '1' ?>">
-                        <button type="submit" class="adm-btn adm-btn-sm"><?= $available ? 'Go offline' : 'Go online' ?></button>
-                    </form>
-                <?php endif; ?>
             </span>
         </div>
     </div>
