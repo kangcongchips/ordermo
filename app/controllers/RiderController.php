@@ -121,7 +121,7 @@ class RiderController extends Controller
             'profile'      => $profile,
             'approved'     => $approved,
             'stats'        => $approved ? $orderModel->riderBoardStats() : ['waiting' => 0, 'in_transit' => 0, 'delivered_today' => 0],
-            'deliveries'   => $approved ? $orderModel->forDelivery() : [],
+            'deliveries'   => $approved ? $orderModel->forDelivery($riderId) : [],
         ], 'portal');
     }
 

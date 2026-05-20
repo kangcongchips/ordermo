@@ -234,6 +234,30 @@ class Merchant
         }
     }
 
+    /**
+     * Owner-completable profile basics: the city, cuisine, and (optional)
+     * cover photo they pick after registration so the public listing can
+     * show them. Pass $coverImage = null to leave the existing photo alone.
+     */
+    public function updateProfileBasics(int $merchantId, ?int $cityId, string $cuisine, ?string $coverImage = null): bool
+    {
+        try {
+            $db = Database::getConnection();
+            if ($coverImage !== null) {
+                $stmt = $db->prepare(
+                    'UPDATE merchants SET city_id = ?, cuisine = ?, cover_image = ? WHERE id = ?'
+                );
+                return $stmt->execute([$cityId, $cuisine, $coverImage, $merchantId]);
+            }
+            $stmt = $db->prepare(
+                'UPDATE merchants SET city_id = ?, cuisine = ? WHERE id = ?'
+            );
+            return $stmt->execute([$cityId, $cuisine, $merchantId]);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     /** Minimal id/name list (any status) for select dropdowns. */
     public function listForSelect(): array
     {

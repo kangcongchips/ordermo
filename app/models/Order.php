@@ -125,7 +125,7 @@ class Order
         }
     }
 
-    /** One restaurant's own orders, newest first, with customer name. */
+    /** One restaurant's own orders, newest first, with customer + rider info. */
     public function forMerchant(int $merchantId, int $limit = 0): array
     {
         try {
@@ -133,9 +133,16 @@ class Order
             $sql =
                 'SELECT o.id, o.subtotal, o.delivery_fee, o.total, o.status,
                         o.delivery_address, o.contact_phone, o.notes, o.created_at,
-                        CONCAT(u.first_name, " ", u.last_name) AS customer_name
+                        o.rider_id,
+                        CONCAT(u.first_name, " ", u.last_name) AS customer_name,
+                        CASE
+                            WHEN r.id IS NULL THEN NULL
+                            ELSE CONCAT(ru.first_name, " ", ru.last_name)
+                        END AS rider_name
                  FROM orders o
-                 JOIN users u ON u.id = o.customer_user_id
+                 JOIN users u   ON u.id  = o.customer_user_id
+                 LEFT JOIN riders r ON r.id = o.rider_id
+                 LEFT JOIN users  ru ON ru.id = r.user_id
                  WHERE o.merchant_id = :m
                  ORDER BY o.id DESC';
             if ($limit > 0) {
@@ -192,14 +199,14 @@ class Order
     }
 
     /**
-     * The delivery board for riders: orders a kitchen has started or sent out,
-     * oldest first (FIFO), with restaurant + drop-off details.
+     * Deliveries for a specific rider — only orders the merchant has assigned
+     * to them and haven't been completed yet. Oldest first (FIFO).
      */
-    public function forDelivery(): array
+    public function forDelivery(int $riderId): array
     {
         try {
-            $db = Database::getConnection();
-            return $db->query(
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
                 'SELECT o.id, o.total, o.status, o.delivery_address,
                         o.contact_phone, o.created_at,
                         m.business_name, m.business_address,
@@ -207,9 +214,12 @@ class Order
                  FROM orders o
                  JOIN merchants m ON m.id = o.merchant_id
                  JOIN users u ON u.id = o.customer_user_id
-                 WHERE o.status IN ("preparing", "on_the_way")
+                 WHERE o.rider_id = :rider
+                   AND o.status IN ("preparing", "on_the_way")
                  ORDER BY o.created_at ASC'
-            )->fetchAll();
+            );
+            $stmt->execute([':rider' => $riderId]);
+            return $stmt->fetchAll();
         } catch (Throwable $e) {
             return [];
         }
@@ -225,6 +235,26 @@ class Order
             $stmt = $db->prepare('UPDATE orders SET status = ? WHERE id = ?');
             $stmt->execute([$status, $id]);
             return $stmt->rowCount() >= 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Hand an order off to a specific rider. Also nudges status to "preparing"
+     * if it was still "pending" so the order lands on the rider's board.
+     */
+    public function assignRider(int $orderId, int $riderId): bool
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'UPDATE orders
+                 SET rider_id = ?,
+                     status   = CASE WHEN status = "pending" THEN "preparing" ELSE status END
+                 WHERE id = ?'
+            );
+            return $stmt->execute([$riderId, $orderId]);
         } catch (Throwable $e) {
             return false;
         }

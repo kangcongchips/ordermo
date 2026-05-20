@@ -240,6 +240,7 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_user_id INT NOT NULL,
     merchant_id INT NOT NULL,
+    rider_id INT DEFAULT NULL,
     delivery_address VARCHAR(255) NOT NULL,
     contact_phone VARCHAR(20) NOT NULL,
     payment_method ENUM('cod') NOT NULL DEFAULT 'cod',
@@ -253,8 +254,10 @@ CREATE TABLE orders (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
+    FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL,
     INDEX idx_customer (customer_user_id),
     INDEX idx_merchant (merchant_id),
+    INDEX idx_rider (rider_id),
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 

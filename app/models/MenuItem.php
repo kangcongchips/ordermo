@@ -48,6 +48,27 @@ class MenuItem
         }
     }
 
+    /**
+     * Every menu item owned by this merchant (available + hidden), newest first.
+     * For the merchant's own management page — they should see hidden items too.
+     */
+    public function allForMerchant(int $merchantId): array
+    {
+        try {
+            $db   = Database::getConnection();
+            $stmt = $db->prepare(
+                'SELECT id, name, description, price, image, category, is_available, created_at
+                 FROM menu_items
+                 WHERE merchant_id = :m
+                 ORDER BY id DESC'
+            );
+            $stmt->execute([':m' => $merchantId]);
+            return $stmt->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
     /** All menu items (any availability) joined with merchant, for admin. */
     public function allWithMerchant(): array
     {

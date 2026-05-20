@@ -5,7 +5,17 @@
       "Bash(php -l /home/jonel/jonex/app/models/Merchant.php /home/jonel/jonex/app/models/Rider.php /home/jonel/jonex/app/controllers/MerchantController.php /home/jonel/jonex/app/controllers/RiderController.php)",
       "Bash(php -l /home/jonel/jonex/app/controllers/RiderController.php /home/jonel/jonex/app/controllers/MerchantController.php)",
       "Bash(php -l /home/jonel/jonex/app/views/admin/riders.php /home/jonel/jonex/app/views/admin/merchants.php /home/jonel/jonex/app/views/admin/dashboard.php)",
-      "Bash(php -l /home/jonel/jonex/app/views/rider/dashboard.php /home/jonel/jonex/app/controllers/RiderController.php /home/jonel/jonex/app/models/Order.php)"
+      "Bash(php -l /home/jonel/jonex/app/views/rider/dashboard.php /home/jonel/jonex/app/controllers/RiderController.php /home/jonel/jonex/app/models/Order.php)",
+      "Bash(php -l /home/jonel/jonex/app/views/merchant/dashboard.php)",
+      "Bash(php -l /home/jonel/jonex/app/controllers/MerchantController.php)",
+      "Bash(php -l /home/jonel/jonex/app/models/MenuItem.php)",
+      "Bash(php -l /home/jonel/jonex/app/views/merchant/products.php)",
+      "Bash(php -l /home/jonel/jonex/app/views/layouts/merchant.php)",
+      "Bash(php -l /home/jonel/jonex/app/views/merchant/orders.php)",
+      "Bash(php -l /home/jonel/jonex/app/models/Order.php)",
+      "Bash(php -l /home/jonel/jonex/app/models/Rider.php)",
+      "Bash(php -l /home/jonel/jonex/app/controllers/RiderController.php)",
+      "Bash(php -l /home/jonel/jonex/app/views/admin/orders.php)"
     ]
   }
 }

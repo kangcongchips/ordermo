@@ -1585,6 +1585,11 @@ a.btn-primary {
     border-radius: 8px;
     margin-bottom: 1.25rem;
 }
+.adm-flash-error {
+    background: #fdecea;
+    border-color: #f3c3bd;
+    color: #b3261e;
+}
 
 .adm-errors {
     background: #fdecea;
@@ -1955,4 +1960,703 @@ a.btn-primary {
     .rider-hero { flex-direction: column; align-items: stretch; }
     .rider-hero-action { display: flex; }
     .rider-hero-btn { width: 100%; }
+}
+
+/* ---------------------------------------------------------------------------
+   Merchant dashboard — hero, soft order-acceptance toggle, icon stat cards,
+   empty state, and the first-login city/cuisine setup modal.
+   --------------------------------------------------------------------------- */
+.mdash-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.4rem 1.6rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(120deg, #fff4ef 0%, #ffe3d6 100%);
+    border: 1px solid #ffd0bc;
+}
+.mdash-hero-text { min-width: 0; }
+.mdash-hero-greeting {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #b3492c;
+    margin-bottom: 0.15rem;
+}
+.mdash-hero-name {
+    margin: 0 0 0.25rem;
+    font-size: 1.4rem;
+    color: #1a1f2e;
+}
+.mdash-hero-sub {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #5b4136;
+    max-width: 60ch;
+}
+
+.mdash-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.mdash-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #ff5a3c;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.65rem 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px -4px rgba(255, 90, 60, 0.55);
+    transition: background 0.15s, transform 0.15s;
+}
+.mdash-cta:hover { background: #e84a2e; transform: translateY(-1px); }
+.mdash-cta:focus-visible {
+    outline: 2px solid #1a1f2e;
+    outline-offset: 2px;
+}
+.mdash-cta svg { width: 16px; height: 16px; }
+
+.mdash-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: #fff;
+    border: 1px solid #f3d1c0;
+    border-radius: 999px;
+    padding: 0.45rem 0.5rem 0.45rem 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    flex-shrink: 0;
+}
+.mdash-toggle-label { display: flex; flex-direction: column; line-height: 1.15; }
+.mdash-toggle-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.mdash-toggle-state {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+.mdash-toggle-state-on  { color: #1c7c42; }
+.mdash-toggle-state-off { color: #b3492c; }
+
+.mdash-switch {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    width: 48px;
+    height: 28px;
+    border-radius: 999px;
+    background: #d1d5db;
+    position: relative;
+    padding: 0;
+    transition: background 0.18s;
+}
+.mdash-switch.is-on { background: #1c7c42; }
+.mdash-switch-dot {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: left 0.18s;
+}
+.mdash-switch.is-on .mdash-switch-dot { left: 23px; }
+.mdash-switch:focus-visible { outline: 2px solid #ff5a3c; outline-offset: 2px; }
+
+.mdash-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.mdash-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: #fff;
+    border: 1px solid #e6e8eb;
+    border-radius: 12px;
+    padding: 1.1rem 1.15rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.mdash-stat:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px -10px rgba(15, 23, 42, 0.25);
+}
+.mdash-stat-ico {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.mdash-stat-ico svg { width: 22px; height: 22px; }
+.mdash-stat-orders  .mdash-stat-ico { background: #fff1eb; color: #ff5a3c; }
+.mdash-stat-pending .mdash-stat-ico { background: #fef4e5; color: #a05a00; }
+.mdash-stat-menu    .mdash-stat-ico { background: #e8f0fe; color: #1a56db; }
+.mdash-stat-revenue .mdash-stat-ico { background: #e7f7ed; color: #1c7c42; }
+
+.mdash-stat-num {
+    display: block;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #1a1f2e;
+    line-height: 1.1;
+}
+.mdash-stat-label {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+}
+
+.mdash-empty {
+    text-align: center;
+    padding: 2.25rem 1rem;
+    color: #6b7280;
+}
+.mdash-empty-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fff1eb;
+    color: #ff5a3c;
+    margin-bottom: 0.75rem;
+}
+.mdash-empty-ico svg { width: 28px; height: 28px; }
+.mdash-empty-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1f2e;
+}
+.mdash-empty-sub {
+    margin: 0.25rem auto 0;
+    max-width: 42ch;
+    font-size: 0.88rem;
+}
+
+/* Setup modal — required city + cuisine after first login. */
+.mdash-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: mdash-fade 0.18s ease-out;
+}
+.mdash-modal-overlay[hidden] { display: none; }
+@keyframes mdash-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.mdash-modal {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    padding: 1.6rem 1.6rem 1.3rem;
+    animation: mdash-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+.mdash-modal-wide { max-width: 640px; }
+
+.mdash-modal-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f5f7;
+    color: #6b7280;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.mdash-modal-close:hover { background: #fdecea; color: #b3261e; }
+.mdash-modal-close svg { width: 16px; height: 16px; }
+
+.mdash-modal-cancel {
+    font: inherit;
+    font-weight: 600;
+    color: #4b5563;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 0.55rem 0.9rem;
+}
+.mdash-modal-cancel:hover { color: #1a1f2e; }
+@keyframes mdash-pop {
+    from { transform: translateY(8px) scale(0.98); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+}
+
+.mdash-modal-head { margin-bottom: 1.15rem; }
+.mdash-modal-step {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ff5a3c;
+    background: #fff1eb;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    margin-bottom: 0.5rem;
+}
+.mdash-modal-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.2rem;
+    color: #1a1f2e;
+}
+.mdash-modal-sub {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+.mdash-modal-sub strong { color: #1a1f2e; }
+
+.mdash-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.mdash-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+}
+.mdash-field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #4b5563;
+}
+.mdash-field-optional {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    background: #f4f5f7;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+}
+.mdash-field input[type="text"],
+.mdash-field input[type="number"],
+.mdash-field select {
+    font: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    background: #fff;
+    color: #1a1f2e;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.mdash-field input[type="text"]:focus,
+.mdash-field input[type="number"]:focus,
+.mdash-field select:focus {
+    outline: 0;
+    border-color: #ff5a3c;
+    box-shadow: 0 0 0 3px rgba(255, 90, 60, 0.18);
+}
+.mdash-field input::placeholder { color: #b6bbc4; }
+.mdash-field-hint { font-size: 0.78rem; color: #9ca3af; }
+
+.mdash-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+}
+
+/* Photo upload — styled drop-zone look. */
+.mdash-upload {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    border: 1.5px dashed #d6dae0;
+    border-radius: 10px;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+}
+.mdash-upload:hover {
+    border-color: #ff5a3c;
+    background: #fff7f5;
+}
+.mdash-upload-ico {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff1eb;
+    color: #ff5a3c;
+    border-radius: 10px;
+}
+.mdash-upload-ico svg { width: 20px; height: 20px; }
+.mdash-upload-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    flex: 1;
+    min-width: 0;
+}
+.mdash-upload-text strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1f2e;
+}
+.mdash-upload-text small {
+    font-size: 0.76rem;
+    color: #9ca3af;
+}
+.mdash-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Availability — styled checkbox card replacing the bare checkbox. */
+.mdash-availability {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #e6e8eb;
+    border-radius: 11px;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.mdash-availability:hover { border-color: #d1d5db; }
+.mdash-availability input { position: absolute; opacity: 0; pointer-events: none; }
+.mdash-availability-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex: 1;
+    min-width: 0;
+}
+.mdash-availability-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1a1f2e;
+}
+.mdash-availability-sub {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+.mdash-availability-mark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: transparent;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.mdash-availability-mark svg { width: 16px; height: 16px; }
+.mdash-availability:has(input:checked) {
+    background: #e7f7ed;
+    border-color: #1c7c42;
+}
+.mdash-availability:has(input:checked) .mdash-availability-mark {
+    background: #1c7c42;
+    border-color: #1c7c42;
+    color: #fff;
+}
+
+.mdash-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+}
+.mdash-chip {
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #4b5563;
+    background: #f4f5f7;
+    border: 1px solid #e6e8eb;
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+}
+.mdash-chip:hover { background: #fff1eb; border-color: #ffd0bc; color: #b3492c; }
+
+.mdash-modal-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid #eef0f2;
+}
+.mdash-modal-note { font-size: 0.8rem; color: #9ca3af; }
+
+/* Page-head strip used by /merchant/orders and /merchant/products. */
+.mdash-page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.mdash-page-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1a1f2e;
+}
+.mdash-page-count { color: #9ca3af; font-weight: 500; }
+.mdash-page-sub {
+    margin: 0.2rem 0 0;
+    font-size: 0.88rem;
+    color: #6b7280;
+    max-width: 56ch;
+}
+
+.mdash-pill-stats { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.mdash-pill {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: #f4f5f7;
+    color: #4b5563;
+}
+.mdash-pill-warn { background: #fef4e5; color: #a05a00; }
+.mdash-pill-info { background: #fff1eb; color: #c23a1f; }
+.mdash-pill-blue { background: #e8f0fe; color: #1a56db; }
+.mdash-pill-red  { background: #fdecea; color: #b3261e; }
+
+/* Rider column on /merchant/orders. */
+.mdash-rider-cell { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.mdash-rider-tag {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1a1f2e;
+}
+.mdash-rider-change {
+    background: #f4f5f7;
+    color: #4b5563;
+}
+.mdash-rider-change:hover { background: #e6e8eb; }
+
+/* Rider-pick list inside the assign-rider modal. */
+.mdash-rider-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+.mdash-rider-option {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #e6e8eb;
+    border-radius: 11px;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.mdash-rider-option:hover { border-color: #d1d5db; background: #fff; }
+.mdash-rider-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.mdash-rider-option:has(input:checked) {
+    background: #fff1eb;
+    border-color: #ff5a3c;
+    box-shadow: 0 0 0 2px rgba(255, 90, 60, 0.12);
+}
+
+.mdash-rider-avatar {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #1a1f2e;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+.mdash-rider-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    flex: 1;
+    min-width: 0;
+}
+.mdash-rider-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1a1f2e;
+}
+.mdash-rider-meta {
+    font-size: 0.78rem;
+    color: #6b7280;
+}
+.mdash-rider-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}
+.mdash-rider-status-on  { background: #e7f7ed; color: #1c7c42; }
+.mdash-rider-status-off { background: #f4f5f7; color: #6b7280; }
+
+/* Product cards on /merchant/products. */
+.mdash-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+.mdash-product {
+    background: #fff;
+    border: 1px solid #e6e8eb;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.mdash-product:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px -14px rgba(15, 23, 42, 0.3);
+}
+.mdash-product.is-hidden { opacity: 0.6; }
+
+.mdash-product-image {
+    position: relative;
+    height: 140px;
+    background: #f4f5f7 center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mdash-product-placeholder { color: #c9ced6; }
+.mdash-product-placeholder svg { width: 38px; height: 38px; }
+.mdash-product-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    backdrop-filter: blur(2px);
+}
+
+.mdash-product-body {
+    padding: 0.85rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+.mdash-product-cat {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9ca3af;
+}
+.mdash-product-name {
+    margin: 0;
+    font-size: 1rem;
+    color: #1a1f2e;
+}
+.mdash-product-desc {
+    margin: 0;
+    font-size: 0.84rem;
+    color: #6b7280;
+    line-height: 1.4;
+    flex: 1;
+}
+.mdash-product-price {
+    margin-top: 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1c7c42;
+}
+
+@media (max-width: 1024px) {
+    .mdash-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+    .mdash-hero { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .mdash-hero-actions { justify-content: flex-start; }
+    .mdash-toggle { align-self: flex-start; }
+    .mdash-stats { grid-template-columns: 1fr 1fr; }
+    .mdash-modal { padding: 1.25rem; }
+    .mdash-modal-foot { flex-direction: column; align-items: stretch; }
+    .mdash-modal-foot .adm-btn { width: 100%; }
+    .mdash-field-row { grid-template-columns: 1fr; }
+    .mdash-product-grid { grid-template-columns: 1fr 1fr; }
+    .mdash-page-head { flex-direction: column; align-items: stretch; }
+    .mdash-page-head .mdash-cta { justify-content: center; }
 }

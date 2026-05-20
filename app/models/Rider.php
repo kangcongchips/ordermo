@@ -140,6 +140,27 @@ class Rider
         }
     }
 
+    /**
+     * Riders a merchant can hand an order to right now: approved, account
+     * active, and currently online (is_available = 1). Online-first ordering.
+     */
+    public function availableForAssignment(): array
+    {
+        try {
+            $db = Database::getConnection();
+            return $db->query(
+                'SELECT r.id, r.vehicle_type, r.is_available,
+                        u.first_name, u.last_name, u.phone
+                 FROM riders r
+                 JOIN users u ON u.id = r.user_id
+                 WHERE r.application_status = "approved" AND u.status = "active"
+                 ORDER BY r.is_available DESC, u.first_name'
+            )->fetchAll();
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
     /** Toggle whether the rider is accepting deliveries. */
     public function setAvailability(int $riderId, bool $available): bool
     {
